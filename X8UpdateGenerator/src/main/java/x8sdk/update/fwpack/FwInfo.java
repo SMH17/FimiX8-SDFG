@@ -88,7 +88,7 @@ public class FwInfo implements Serializable {
         this.releaseDate = releaseDate;
     }
 
-    public FirmwareType getFirmwareType(){
+    public FirmwareType getFirmwareType() {
         if (this.typeId == 0 && this.modelId == 3) {
             return FirmwareType.FC;
         }

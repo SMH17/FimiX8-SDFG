@@ -304,7 +304,7 @@ public class ByteHexHelper {
 
     public static byte[] appendByteArray(byte[] src, byte[] data) {
         if (src.length <= 0 || data.length <= 0) {
-            throw new IllegalArgumentException("字节数组参数错误");
+            throw new IllegalArgumentException("Byte array parameter error");
         }
         byte[] ret = new byte[(src.length + data.length)];
         System.arraycopy(src, 0, ret, 0, src.length);

@@ -173,23 +173,23 @@ public class UpfirewareDto extends BaseModel {
     }
 
     public String toString() {
-        return  "x8sdk.UpfirewareDto{" +
-                      "type=" + this.type + ", sysNameI18N='" + this.sysNameI18N.toString() + SINGLE_QUOTE_CHAR +
-                    ", updateContentI18N='" + this.updateContentI18N.toString() + SINGLE_QUOTE_CHAR +
-                    ", logicVersion=" + this.logicVersion +
-                    ", userVersion='" + this.userVersion + SINGLE_QUOTE_CHAR +
-                    ", fileUrl='" + this.fileUrl + SINGLE_QUOTE_CHAR +
-                    ", fileSize=" + this.fileSize +
-                    ", fileEncode='" + this.fileEncode + SINGLE_QUOTE_CHAR +
-                    ", status='" + this.status + SINGLE_QUOTE_CHAR +
-                    ", model=" + this.model +
-                    ", pushFireType=" + this.pushFireType +
-                    ", forceSign='" + this.forceSign + SINGLE_QUOTE_CHAR +
-                    ", startVersion=" + this.startVersion +
-                    ", endVersion=" + this.endVersion +
-                    ", updateResult='" + this.updateResult + SINGLE_QUOTE_CHAR +
-                    ", downResult='" + this.downResult + SINGLE_QUOTE_CHAR +
-                    ", forceOta='" + this.forceOta + SINGLE_QUOTE_CHAR +
+        return "x8sdk.UpfirewareDto{" +
+                "type=" + this.type + ", sysNameI18N='" + this.sysNameI18N.toString() + SINGLE_QUOTE_CHAR +
+                ", updateContentI18N='" + this.updateContentI18N.toString() + SINGLE_QUOTE_CHAR +
+                ", logicVersion=" + this.logicVersion +
+                ", userVersion='" + this.userVersion + SINGLE_QUOTE_CHAR +
+                ", fileUrl='" + this.fileUrl + SINGLE_QUOTE_CHAR +
+                ", fileSize=" + this.fileSize +
+                ", fileEncode='" + this.fileEncode + SINGLE_QUOTE_CHAR +
+                ", status='" + this.status + SINGLE_QUOTE_CHAR +
+                ", model=" + this.model +
+                ", pushFireType=" + this.pushFireType +
+                ", forceSign='" + this.forceSign + SINGLE_QUOTE_CHAR +
+                ", startVersion=" + this.startVersion +
+                ", endVersion=" + this.endVersion +
+                ", updateResult='" + this.updateResult + SINGLE_QUOTE_CHAR +
+                ", downResult='" + this.downResult + SINGLE_QUOTE_CHAR +
+                ", forceOta='" + this.forceOta + SINGLE_QUOTE_CHAR +
                 "}";
     }
 }

@@ -12,9 +12,9 @@ public enum FirmwareType {
     OTA,
     UNKNOWN;
 
-    public static FirmwareType fromString(String type){
-        for(FirmwareType firmwareType : FirmwareType.values()){
-            if(firmwareType.name().equalsIgnoreCase(type)){
+    public static FirmwareType fromString(String type) {
+        for (FirmwareType firmwareType : FirmwareType.values()) {
+            if (firmwareType.name().equalsIgnoreCase(type)) {
                 return firmwareType;
             }
         }

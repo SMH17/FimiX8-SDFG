@@ -20,10 +20,10 @@ public class FirmwareBuildPack {
     public static final int ERROR = 1;
     public static final Path WORKINGDIR = Paths.get("tmp");
     public static final Path PKG_CRC = Paths.get(WORKINGDIR.toString(), "pgk_crc");
-    public static final Path PKG_HEADER_FILE = Paths.get(WORKINGDIR.toString(),"update_file_header");
-    public static final Path PKG_NOCRC = Paths.get(WORKINGDIR.toString(),"pgk_no_crc");
-    public static final Path PKG_UPDATE_FILE = Paths.get(WORKINGDIR.toString(),"fr_firmware.bin"); //was all_chips.bin
-    public static final Path PKG_UPDATE_OUTFILE = Paths.get(WORKINGDIR.toString(),"update_fileData");
+    public static final Path PKG_HEADER_FILE = Paths.get(WORKINGDIR.toString(), "update_file_header");
+    public static final Path PKG_NOCRC = Paths.get(WORKINGDIR.toString(), "pgk_no_crc");
+    public static final Path PKG_UPDATE_FILE = Paths.get(WORKINGDIR.toString(), "fr_firmware.bin"); //was all_chips.bin
+    public static final Path PKG_UPDATE_OUTFILE = Paths.get(WORKINGDIR.toString(), "update_fileData");
     public static final int SUCCESS = 0;
 
     private List<FwInfo> fws;
@@ -33,12 +33,12 @@ public class FirmwareBuildPack {
         try {
             deleteTempDir();
             FileUtil.createFileAndPaperFile(WORKINGDIR);
-        } catch (Exception x){
+        } catch (Exception x) {
             SimpleLogger.log(SimpleLogger.LogType.ERROR, "Failed to create temp directory.");
         }
     }
 
-    public void createUpdatePkg(Path filename, Path fwfolder){
+    public void createUpdatePkg(Path filename, Path fwfolder) {
         try {
 
             SimpleLogger.log(SimpleLogger.LogType.INFO, "Copying firmware files");
@@ -60,7 +60,7 @@ public class FirmwareBuildPack {
 
             SimpleLogger.log(SimpleLogger.LogType.INFO, "Cleaning up");
             String updateFileName;
-            if(filename == null || filename.toString().isEmpty()) {
+            if (filename == null || filename.toString().isEmpty()) {
                 updateFileName = "fr_firmware";
                 for (FwInfo fw : fws) {
                     updateFileName += "_" + fw.getFirmwareType().name().toLowerCase();
@@ -75,7 +75,7 @@ public class FirmwareBuildPack {
             SimpleLogger.log(SimpleLogger.LogType.INFO, "Generated firmware: " + updateFileName);
 
 
-        } catch (Exception x){
+        } catch (Exception x) {
             SimpleLogger.log(SimpleLogger.LogType.ERROR, "Well, that didn't worked so well.");
             x.printStackTrace();
         }
@@ -90,8 +90,8 @@ public class FirmwareBuildPack {
         return packInfo;
     }
 
-    public byte[] getPackCRC(Path fileName) throws Exception{
-        if(fileName.toFile().exists()) {
+    public byte[] getPackCRC(Path fileName) throws Exception {
+        if (fileName.toFile().exists()) {
             byte[] fileBytes = FileUtil.getFileBytes(fileName);
             return ByteHexHelper.intToFourHexBytes(ByteArrayToIntArray.CRC32Software(fileBytes, fileBytes.length));
         } else {
@@ -128,19 +128,19 @@ public class FirmwareBuildPack {
         return iByte;
     }
 
-    public void mergFwDataFile(Path outFile) throws Exception{
+    public void mergFwDataFile(Path outFile) throws Exception {
         FileChannel outChannel = null;
         try {
             outChannel = new FileOutputStream(outFile.toFile()).getChannel();
             for (FwInfo fw : this.fws) {
                 SimpleLogger.log(SimpleLogger.LogType.DEBUG, "Copying " + fw.getFilename());
-                if(fw.getFilename().toFile().exists()) {
+                if (fw.getFilename().toFile().exists()) {
                     FileChannel fc = new FileInputStream(fw.getFilename().toFile()).getChannel();
                     ByteBuffer bb = ByteBuffer.allocate(8192);
                     while (fc.read(bb) != -1) {
-                        ((Buffer)bb).flip();
+                        ((Buffer) bb).flip();
                         outChannel.write(bb);
-                        ((Buffer)bb).clear();
+                        ((Buffer) bb).clear();
                     }
                     fc.close();
                 } else {
@@ -161,12 +161,13 @@ public class FirmwareBuildPack {
         }
     }
 
-    private void deleteTempDir(){
+    private void deleteTempDir() {
         try {
             Files.walk(WORKINGDIR)
                     .sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
-        } catch (Exception x){}
+        } catch (Exception x) {
+        }
     }
 }

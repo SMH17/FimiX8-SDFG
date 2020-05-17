@@ -6,6 +6,10 @@ import x8sdk.update.fwpack.ByteHexHelper;
 import x8sdk.update.fwpack.FirmwareType;
 import x8sdk.update.fwpack.FwInfo;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.FileReader;
 import java.io.InputStream;
 import java.net.URL;
@@ -21,7 +25,7 @@ import java.util.List;
 
 public class UpdateUtil {
 
-    public static final String fimi_api_url_de = "https://fimiservice-newus.mi-ae.com/v3/firmware/getFirmwareDetail";
+    public static final String fimi_api_url = "https://fimiservice-newus.mi-ae.com/v3/firmware/getFirmwareDetail";
 
     public static List<UpfirewareDto> filterX8sFirmware(List<UpfirewareDto> list) {
         List<UpfirewareDto> upfirewareDtoList = new ArrayList();
@@ -29,9 +33,9 @@ public class UpdateUtil {
             if (isX8sFirmware(dto)) {
                 boolean normalUpdate = true;//localFwEntity.getLogicVersion() < dto.getLogicVersion() && "0".equals(dto.getForceSign());
                 boolean forceUpdate = false;//localFwEntity.getLogicVersion() < dto.getLogicVersion() && "2".equals(dto.getForceSign());
-                boolean ingoreUpdate = false;//localFwEntity.getLogicVersion() != dto.getLogicVersion() && "1".equals(dto.getForceSign());
+                boolean ignoreUpdate = false;//localFwEntity.getLogicVersion() != dto.getLogicVersion() && "1".equals(dto.getForceSign());
                 boolean isUpdateZone = true;//dto.getEndVersion() == 0 || (localFwEntity.getLogicVersion() <= ((long) dto.getEndVersion()) && localFwEntity.getLogicVersion() >= ((long) dto.getStartVersion()));
-                if ((normalUpdate || forceUpdate || ingoreUpdate) && isUpdateZone) {
+                if ((normalUpdate || forceUpdate || ignoreUpdate) && isUpdateZone) {
                     upfirewareDtoList.add(dto);
                 }
             }
@@ -51,12 +55,12 @@ public class UpdateUtil {
             fwInfo.setDownloadUrl(upfirewareDto.getFileUrl());
             fwInfo.setChecksumMD5(upfirewareDto.getFileEncode());
             int dateIndex = upfirewareDto.getFileUrl().indexOf("app");
-            if(dateIndex != -1){
+            if (dateIndex != -1) {
                 try {
                     Date date = new Date();
-                    date.setTime(Long.valueOf(upfirewareDto.getFileUrl().substring(dateIndex + 3, dateIndex + 16)));
+                    date.setTime(Long.parseLong(upfirewareDto.getFileUrl().substring(dateIndex + 3, dateIndex + 16)));
                     fwInfo.setReleaseDate(date);
-                } catch (Exception x){
+                } catch (Exception x) {
                     x.printStackTrace();
                 }
             }
@@ -65,30 +69,56 @@ public class UpdateUtil {
         return fws;
     }
 
+
     public static Path getFirmwareJsonFromServer(Path folder) throws Exception {
-        InputStream in = new URL(fimi_api_url_de).openStream();
-        Path filename = Paths.get(folder.toString() + "/getFirmwareDetail.json");
+        // Create a trust manager that does not validate certificate chains like the default to avoid SSLHandshakeException Error
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                        //No need to implement.
+                    }
+
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
+                        //No need to implement.
+                    }
+                }
+        };
+        // Install the all-trusting trust manager
+        try {
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        } catch (Exception e) {
+            System.out.println("Approve all certificates routine failed. Error:\n" + e);
+        }
+
+        InputStream in = new URL(fimi_api_url).openStream();
+        Path filename = Paths.get(folder.toString() + "/getFirmwareDetail.jfproj");
         Files.copy(in, filename, StandardCopyOption.REPLACE_EXISTING);
         return filename;
     }
 
-    public static Path getFirmwareImageFromServer(FwInfo fwInfo){
-        try{
+    public static Path getFirmwareImageFromServer(FwInfo fwInfo) {
+        try {
             SimpleLogger.log(SimpleLogger.LogType.INFO, "Downloading " + fwInfo.getFilename().getFileName());
             InputStream in = new URL(fwInfo.getDownloadUrl()).openStream();
             Files.copy(in, fwInfo.getFilename(), StandardCopyOption.REPLACE_EXISTING);
             return fwInfo.getFilename();
-        }catch (Exception x){
-            SimpleLogger.log(SimpleLogger.LogType.ERROR, "Download from" + fwInfo.getDownloadUrl()+ " failed.");
+        } catch (Exception x) {
+            SimpleLogger.log(SimpleLogger.LogType.ERROR, "Download from" + fwInfo.getDownloadUrl() + " failed.");
             x.printStackTrace();
         }
         return null;
     }
 
-    public static void getFirmwareImageFromServer( Path fwfolder, List<FwInfo> fwInfos){
+    public static void getFirmwareImageFromServer(Path fwfolder, List<FwInfo> fwInfos) {
         for (FwInfo fwInfo : fwInfos) {
             if (Arrays.asList(FirmwareType.values()).contains(fwInfo.getFirmwareType())) {
-                if(fwInfo.getDownloadUrl().startsWith("http")) {
+                if (fwInfo.getDownloadUrl().startsWith("http")) {
                     fwInfo.setFilename(Paths.get(fwfolder.toString(), fwInfo.getFilename().toString()));
                     fwInfo.setFilename(UpdateUtil.getFirmwareImageFromServer(fwInfo));
                 }
@@ -96,19 +126,21 @@ public class UpdateUtil {
         }
     }
 
-    public static List<UpfirewareDto> UpfirewareDtosFromJSON(Path jsonfile) throws Exception{
-        UpfirewareDto[] upfirewareDtosarr = new GsonBuilder().create().fromJson(new FileReader(jsonfile.toFile()), FimiAPIResponse.class).data;
+    public static List<UpfirewareDto> UpfirewareDtosFromJSON(Path jfprojfile) throws Exception {
+        UpfirewareDto[] upfirewareDtosarr = new GsonBuilder().create().fromJson(new FileReader(jfprojfile.toFile()), FimiAPIResponse.class).data;
         return Arrays.asList(upfirewareDtosarr);
     }
 
-    public static boolean checkMD5(FwInfo fwInfo){
+    public static boolean checkMD5(FwInfo fwInfo) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(Files.readAllBytes(fwInfo.getFilename()));
             byte[] digest = md.digest();
             String calculated = ByteHexHelper.bytesToHexString(digest).replace(" ", "");
             return fwInfo.getChecksumMD5().equalsIgnoreCase(calculated);
-        } catch (Exception e){}
+        } catch (Exception e) {
+            System.out.println(e.toString());
+        }
         return false;
     }
 

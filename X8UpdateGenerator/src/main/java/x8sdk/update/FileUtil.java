@@ -77,7 +77,7 @@ public class FileUtil {
         //throw new UnsupportedOperationException("Method not decompiled: com.fimi.kernel.utils.FileUtil.addFileContent(java.lang.String, byte[]):void");
     }
 
-    public static byte[] getFileBytes(Path filePath) throws Exception{
+    public static byte[] getFileBytes(Path filePath) throws Exception {
         byte[] buffer = null;
         FileInputStream fis = new FileInputStream(filePath.toFile());
         ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
@@ -106,9 +106,9 @@ public class FileUtil {
                 FileChannel fc = new FileInputStream(fw.toFile()).getChannel();
                 ByteBuffer bb = ByteBuffer.allocate(BUFSIZE);
                 while (fc.read(bb) != -1) {
-                    ((Buffer)bb).flip();
+                    ((Buffer) bb).flip();
                     outChannel.write(bb);
-                    ((Buffer)bb).clear();
+                    ((Buffer) bb).clear();
                 }
                 fc.close();
             }
@@ -135,7 +135,7 @@ public class FileUtil {
         f.createNewFile();
     }
 
-    public static void createFileAndPaperFile(Path fileName) throws Exception{
+    public static void createFileAndPaperFile(Path fileName) throws Exception {
         File file = fileName.toFile();
         if (fileName.toString().indexOf(".") != -1) {
             file.createNewFile();
